@@ -23,7 +23,7 @@ Z:\>MSSQLAttacker.exe
  -t                     Target Server
  -d                     Target DatabaseName
  -u                     Target Username [Optional]
- -p                     Target Server [Optional]
+ -p                     Target Password [Optional]
  -dbo                   DatabaseNmae for DBO impersonation
  -ls                    Linked MSSQLServer Name
  -l                     Attacker IP for UNC Path Injection
