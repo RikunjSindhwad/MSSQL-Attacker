@@ -396,7 +396,7 @@ namespace MSSQLAttacker
             doWrite(2, " -t\t\t\tTarget Server", 0);
             doWrite(2, " -d\t\t\tTarget DatabaseName", 0);
             doWrite(2, " -u\t\t\tTarget Username [Optional]", 0);
-            doWrite(2, " -p\t\t\tTarget Server [Optional]", 0);
+            doWrite(2, " -p\t\t\tTarget Password [Optional]", 0);
             doWrite(2, " -dbo\t\t\tDatabaseNmae for DBO impersonation", 0);
             doWrite(2, " -ls\t\t\tLinked MSSQLServer Name", 0);
             doWrite(2, " -l\t\t\tAttacker IP for UNC Path Injection", 0);
