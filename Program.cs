@@ -406,7 +406,9 @@ namespace MSSQLAttacker
             SqlConnection con;
             switch (args.Length)
             {
-                
+                case 1:
+                    printGUIHelp();
+                    return;
                 case 3:
                     con = connectDb(args[1], args[2]);
                     break;
@@ -486,6 +488,7 @@ namespace MSSQLAttacker
             doWrite(2, " -dbo\t\t\tDatabaseNmae for DBO impersonation [Optional]", 0);
             doWrite(2, " -ls\t\t\tLinked MSSQLServer Name", 0);
             doWrite(2, " -l\t\t\tAttacker IP for UNC Path Injection", 0);
+            doWrite(2, " -query\t\t\tCustom SQL Query", 0);
             doWrite(2, " -impersonateSA\t\tImpersonateSA before execution of any attack", 0);
             doWrite(2, " -impersonateDBO\tImpersonateDBO before execution of any attack", 0);
 
