@@ -10,24 +10,25 @@ This tool is intended to carry out well-known attacks on MSSQL database servers.
 > Help Menu
 ```c
 Z:\>MSSQLAttacker.exe
-[*] MSSQL Attacker - V1 by Rikunj Sindhwad [GUI MODE] [*]
-                HELP MENU
- USAGE: binary.exe GUI DatabaseServer DatabaseName [Optional] Username [Optional] Password
- USAGE: binary.exe GUI dc01.corp1.com masters SA SecretPassword
 [*] MSSQL Attacker - V1 by Rikunj Sindhwad [CLI MODE] [*]
                 HELP MENU
  USAGE: binary.exe cli -a AttackName -t DatabaseServer -d DatabaseName
 
  -a                     Attack Mode [Add -a to get list of attacks]
  -t                     Target Server
- -d                     Target DatabaseName
+ -d                     Target DatabaseName [Optional]
  -u                     Target Username [Optional]
  -p                     Target Password [Optional]
  -dbo                   DatabaseNmae for DBO impersonation [Optional]
  -ls                    Linked MSSQLServer Name
  -l                     Attacker IP for UNC Path Injection
+ -query                 Custom SQL Query
  -impersonateSA         ImpersonateSA before execution of any attack
  -impersonateDBO        ImpersonateDBO before execution of any attack
+[*] MSSQL Attacker - V1 by Rikunj Sindhwad [GUI MODE] [*]
+                HELP MENU
+ USAGE: binary.exe GUI DatabaseServer [Optional] DatabaseName [Optional] Username [Optional] Password
+ USAGE: binary.exe GUI dc01.corp1.com masters SA SecretPassword
 
 ```
 
@@ -40,7 +41,7 @@ Z:\>MSSQLAttacker.exe
 [1] Get Information                      [2] UNC PATH Injection          [3] Impersonation Check
 [4] ImpersonateSA                        [5] Impersonate DBO             [6] Enable xp_cmdshell
 [7] Shell_Access                         [8] Check LinkedServers         [9] Enumerate LinkedServer Version
-[10] EnableLinkedServer_xp_cmdshell      [11] LinkedServer xp_cmdshell
+[10] EnableLinkedServer_xp_cmdshell      [11] LinkedServer xp_cmdshell  [12] Custom SQL Query
 [0] Exit Program
 
 [INPUT] Enter Value:
@@ -60,6 +61,7 @@ Z:\>MSSQLAttacker.exe cli -a
         enablelinkedcmdshell
         execlinkedcmd
         execcmd
+        runCustomQuery
 ```
 
 
