@@ -2,7 +2,7 @@
 ###### By Rikunj Sindhwad
 This tool is intended to carry out well-known attacks on MSSQL database servers. The tool was created during the OSEP course, and credit must be given to Offensive Security because some code snippets and ideas were lifted from the course. The tool is open source and can be used by anyone to carry out red team operations. The tool is undetected until it is developed and may be detectable by antivirus software in the future. Consider changing the source code before use.
 
-- If you like the concept, please follow me on social media (if you can find me!).
+- If you like the concept/effort, follow me on social media for a long term connection [LinkedIn](https://www.linkedin.com/in/rikunj/).
 - You can contact me via [telegram](https://t.me/R0B077) if you have any suggestions||improvements||bugs.
 
 #### Guide
