@@ -102,7 +102,7 @@ sub runMSSQLAttacker {
 		})
 	);
 	
-	dialog_description($dialog, "MSSQL-Attacker by Rikunj Sindhwad");
+	dialog_description($dialog, "MSSQL-Attacker V2 by Rikunj Sindhwad");
 	drow_combobox($dialog, "Attacks", "Attacks:", @("getinfo","checkimpersonate","checklinkedservers","checklinkedserverVersion","uncpathinject","enablecmdshell","enablelinkedcmdshell","execlinkedcmd","execcmd","runCustomQuery"));
 	drow_text($dialog, "TargetInstance", "TargetInstance: ");
 	drow_text($dialog, "UserName", "[Optional] UserName: ");

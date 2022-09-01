@@ -1,4 +1,4 @@
-# MSSQL AttackerV1
+# MSSQL AttackerV2
 ###### By Rikunj Sindhwad
 This tool is intended to carry out well-known attacks on MSSQL database servers. The tool was created during the OSEP course, and credit must be given to Offensive Security because some code snippets and ideas were lifted from the course. The tool is open source and can be used by anyone to carry out red team operations. The tool is undetected until it is developed and may be detectable by antivirus software in the future. Consider changing the source code before use.
 
@@ -10,7 +10,7 @@ This tool is intended to carry out well-known attacks on MSSQL database servers.
 > Help Menu
 ```c
 Z:\>MSSQLAttacker.exe
-[*] MSSQL Attacker - V1 by Rikunj Sindhwad [CLI MODE] [*]
+[*] MSSQL Attacker - V2 by Rikunj Sindhwad [CLI MODE] [*]
                 HELP MENU
  USAGE: binary.exe cli -a AttackName -t DatabaseServer -d DatabaseName
 
@@ -25,7 +25,7 @@ Z:\>MSSQLAttacker.exe
  -query                 Custom SQL Query
  -impersonateSA         ImpersonateSA before execution of any attack
  -impersonateDBO        ImpersonateDBO before execution of any attack
-[*] MSSQL Attacker - V1 by Rikunj Sindhwad [GUI MODE] [*]
+[*] MSSQL Attacker - V2 by Rikunj Sindhwad [GUI MODE] [*]
                 HELP MENU
  USAGE: binary.exe GUI DatabaseServer [Optional] DatabaseName [Optional] Username [Optional] Password
  USAGE: binary.exe GUI dc01.corp1.com masters SA SecretPassword
@@ -36,7 +36,7 @@ Z:\>MSSQLAttacker.exe
 
 - [ ] C-GUI 
 ```c
-                                [*] MSSQL Attacker V1 by Rikunj Sindhwad [*]
+                                [*] MSSQL Attacker V2 by Rikunj Sindhwad [*]
 
 [1] Get Information                      [2] UNC PATH Injection          [3] Impersonation Check
 [4] ImpersonateSA                        [5] Impersonate DBO             [6] Enable xp_cmdshell
