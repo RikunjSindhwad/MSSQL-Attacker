@@ -9,7 +9,7 @@ namespace MSSQLAttackerV2.Modules
 {
     internal class Impersonate
     {
-        
+
         public String checkImpersonation(SqlConnection con)
         {
             var runQuery = new RunQuery();

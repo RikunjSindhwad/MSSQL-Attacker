@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data.SqlClient;
-using MSSQLAttackerV2.Modules;
 using System.Runtime.InteropServices;
 
 

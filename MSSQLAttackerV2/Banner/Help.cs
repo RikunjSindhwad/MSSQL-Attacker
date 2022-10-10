@@ -1,11 +1,11 @@
-﻿using System;
-using MSSQLAttackerV2.Modules;
+﻿using MSSQLAttackerV2.Modules;
+using System;
 
 namespace MSSQLAttackerV2.Banner
 {
     public class Help
     {
-        
+
         public void printCliHelp()
         {
             Console.ForegroundColor = ConsoleColor.Green;

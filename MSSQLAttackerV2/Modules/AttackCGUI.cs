@@ -1,6 +1,5 @@
-﻿using System;
-using MSSQLAttackerV2.Modules;
-using MSSQLAttackerV2.Banner;
+﻿using MSSQLAttackerV2.Banner;
+using System;
 using System.Data.SqlClient;
 
 
@@ -19,8 +18,8 @@ namespace MSSQLAttackerV2.Modules
                 Console.Clear();
                 Console.Title = "MSSQL Attacker";
                 Console.WriteLine("\t\t\t\t[*] MSSQL Attacker V2 by Rikunj Sindhwad [*]\n");
-                Console.WriteLine("[1] Get Information\t\t\t [2] UNC PATH Injection\t\t [3] Impersonation Check\n[4] ImpersonateSA\t\t\t [5] Impersonate DBO\t\t [6] Enable xp_cmdshell\n[7] Shell_Access\t\t\t [8] Check LinkedServers\t [9] Enumerate LinkedServer Version");
-                Console.WriteLine("[10] EnableLinkedServer_xp_cmdshell\t [11] LinkedServer xp_cmdshell\t[12] Custom SQL Query");
+                Console.WriteLine("[1] Get Information\t\t\t [2] UNC PATH Injection\t\t [3] Impersonation Check\n[4] ImpersonateSA\t\t\t [5] Impersonate DBO\t\t [6] Toggle xp_cmdshell\n[7] Shell_Access\t\t\t [8] Check LinkedServers\t [9] Enumerate LinkedServer Version");
+                Console.WriteLine("[10] Toggle LinkedServer xp_cmdshell\t [11] LinkedServer xp_cmdshell\t[12] Custom SQL Query");
                 Console.WriteLine("[0] Exit Program\n");
                 Console.Write("[INPUT] Enter Value: ");
             }
@@ -78,11 +77,11 @@ namespace MSSQLAttackerV2.Modules
                     case 3: impersonate.checkImpersonation(con); break;
                     case 4: impersonate.abuseImpersonation(con); break;
                     case 5: impersonate.abuseImpersonationDBO(con); break;
-                    case 6: CommanAttacks.enableXpCmdShell(con); break;
+                    case 6: CommanAttacks.toggleXpCmdShell(con); break;
                     case 7: CommanAttacks.execCMD(con); break;
                     case 8: LinkedServer.enumLinkedServer(con); break;
                     case 9: LinkedServer.enumLinkedServerVersion(con); break;
-                    case 10: LinkedServer.enableLinkedCmdShell(con); break;
+                    case 10: LinkedServer.toggleLinkedCmdShell(con); break;
                     case 11: LinkedServer.linkedServerCmdExec(con); break;
                     case 12: runQuery.customQuery(con); break;
 

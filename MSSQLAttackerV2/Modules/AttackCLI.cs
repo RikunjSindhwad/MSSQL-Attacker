@@ -1,5 +1,5 @@
-﻿using System;
-using MSSQLAttackerV2.Banner;
+﻿using MSSQLAttackerV2.Banner;
+using System;
 using System.Data.SqlClient;
 
 
@@ -7,7 +7,7 @@ namespace MSSQLAttackerV2.Modules
 {
     internal class AttackCLI
     {
-        
+
         public void attack(string[] args)
         {
             String dbserver, lhost, attack;
@@ -22,7 +22,7 @@ namespace MSSQLAttackerV2.Modules
             var connection = new Connection();
             var ArgumentChecker = new ArgumentChecker();
             if (args.Length < 2) { help.printCliHelp(); return; }
-            string[] attacks = { "checkimpersonate", "checklinkedservers", "checklinkedserverVersion", "uncpathinject", "getinfo", "enablecmdshell", "enablelinkedcmdshell", "execlinkedcmd", "execcmd", "runCustomQuery" };
+            string[] attacks = { "checkimpersonate", "checklinkedservers", "checklinkedserverVersion", "uncpathinject", "getinfo", "togglecmdshell", "togglelinkedcmdshell", "execlinkedcmd", "execcmd", "runCustomQuery" };
             if (!ArgumentChecker.checkArgs(args, "-a")) { help.printAttacks(attacks); return; }
             if (ArgumentChecker.checkArgs(args, "-d")) { dbname = args[Array.IndexOf(args, "-d") + 1]; }
             attack = args[Array.IndexOf(args, "-a") + 1];
@@ -61,7 +61,7 @@ namespace MSSQLAttackerV2.Modules
             var CommanAttacks = new CommonAttacks();
             if (Array.Exists(args, element => element == "-impersonateSA")) { impersonate.abuseImpersonation(con); }
             if (Array.Exists(args, element => element == "-impersonateDBO")) { if (ArgumentChecker.checkArgs(args, "-dbo")) { impersonate.abuseImpersonationDBO(con, dboname); } else { impersonate.abuseImpersonationDBO(con); } }
-            
+
 
             //Main Attack
             switch (attack.ToLower())
@@ -84,11 +84,11 @@ namespace MSSQLAttackerV2.Modules
                 case "uncpathinject":
                     CommanAttacks.uncPathInjection(con, lhost);
                     break;
-                case "enablecmdshell":
-                    CommanAttacks.enableXpCmdShell(con);
+                case "togglecmdshell":
+                    CommanAttacks.toggleXpCmdShell(con);
                     break;
-                case "enablelinkedcmdshell":
-                    LinkedServer.enableLinkedCmdShell(con, linkedServer);
+                case "togglelinkedcmdshell":
+                    LinkedServer.toggleLinkedCmdShell(con, linkedServer);
                     break;
                 case "execcmd":
 

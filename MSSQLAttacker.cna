@@ -54,7 +54,7 @@ sub runMSSQLAttacker {
 				$linkedServer = $3["ls"];
 				$command = "$command -ls $linkedServer";
 			}
-			if ($Attack eq "enablelinkedcmdshell"){
+			if ($Attack eq "togglelinkedcmdshell"){
 				if ($3["ls"] eq $null) {
 					error("Linked Server");
 					return;
@@ -103,7 +103,7 @@ sub runMSSQLAttacker {
 	);
 	
 	dialog_description($dialog, "MSSQL-Attacker V2 by Rikunj Sindhwad");
-	drow_combobox($dialog, "Attacks", "Attacks:", @("getinfo","checkimpersonate","checklinkedservers","checklinkedserverVersion","uncpathinject","enablecmdshell","enablelinkedcmdshell","execlinkedcmd","execcmd","runCustomQuery"));
+	drow_combobox($dialog, "Attacks", "Attacks:", @("getinfo","checkimpersonate","checklinkedservers","checklinkedserverVersion","uncpathinject","togglecmdshell","togglelinkedcmdshell","execlinkedcmd","execcmd","runCustomQuery"));
 	drow_text($dialog, "TargetInstance", "TargetInstance: ");
 	drow_text($dialog, "UserName", "[Optional] UserName: ");
 	drow_text($dialog, "Password", "[Optional] Password: ");

