@@ -18,7 +18,7 @@ namespace MSSQLAttackerV2.Modules
                 Console.Clear();
                 Console.Title = "MSSQL Attacker";
                 Console.WriteLine("\t\t\t\t[*] MSSQL Attacker V2 by Rikunj Sindhwad [*]\n");
-                Console.WriteLine("[1] Get Information\t\t\t [2] UNC PATH Injection\t\t [3] Impersonation Check\n[4] ImpersonateSA\t\t\t [5] Impersonate DBO\t\t [6] Toggle xp_cmdshell\n[7] Shell_Access\t\t\t [8] Check LinkedServers\t [9] Enumerate LinkedServer Version");
+                Console.WriteLine("[1] Get Information\t\t\t [2] UNC PATH Injection\t\t [3] Impersonation Check\n[4] Impersonate\t\t\t\t [5] Impersonate DBO\t\t [6] Toggle xp_cmdshell\n[7] Shell_Access\t\t\t [8] Check LinkedServers\t [9] Enumerate LinkedServer Version");
                 Console.WriteLine("[10] Toggle LinkedServer xp_cmdshell\t [11] LinkedServer xp_cmdshell\t[12] Custom SQL Query");
                 Console.WriteLine("[0] Exit Program\n");
                 Console.Write("[INPUT] Enter Value: ");
@@ -75,7 +75,7 @@ namespace MSSQLAttackerV2.Modules
                     case 1: getinfo.loginInfo(con); break;
                     case 2: CommanAttacks.uncPathInjection(con); break;
                     case 3: impersonate.checkImpersonation(con); break;
-                    case 4: impersonate.abuseImpersonation(con); break;
+                    case 4: impersonate.impersonate(con); break;
                     case 5: impersonate.abuseImpersonationDBO(con); break;
                     case 6: CommanAttacks.toggleXpCmdShell(con); break;
                     case 7: CommanAttacks.execCMD(con); break;

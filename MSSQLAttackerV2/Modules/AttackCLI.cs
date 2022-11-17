@@ -16,6 +16,7 @@ namespace MSSQLAttackerV2.Modules
             String dbname = "";
             String dboname = "";
             String customQuery = "";
+            String impersonateUser = "";
             SqlConnection con;
             var help = new Help();
             var runQuery = new RunQuery();
@@ -29,6 +30,7 @@ namespace MSSQLAttackerV2.Modules
             if (!ArgumentChecker.checkSubargs(args, attack)) { return; }
 
             dbserver = args[Array.IndexOf(args, "-t") + 1];
+            impersonateUser = args[Array.IndexOf(args, "-iuser") + 1];
 
             linkedServer = args[Array.IndexOf(args, "-ls") + 1];
             command = args[Array.IndexOf(args, "-c") + 1];
@@ -59,7 +61,9 @@ namespace MSSQLAttackerV2.Modules
             var impersonate = new Impersonate();
             var LinkedServer = new LinkedServer();
             var CommanAttacks = new CommonAttacks();
-            if (Array.Exists(args, element => element == "-impersonateSA")) { impersonate.abuseImpersonation(con); }
+            
+            if (Array.Exists(args, element => element == "-impersonate")) { if (ArgumentChecker.checkArgs(args, "-iuser")) { impersonate.impersonate(con, impersonateUser); } else { var helpwrite = new Helpwrite(); helpwrite.doWrite(0, "Missing username to impersonate [-iuser]");return; } }
+            if (Array.Exists(args, element => element == "-impersonateSA")) { impersonate.impersonate(con,"SA"); }
             if (Array.Exists(args, element => element == "-impersonateDBO")) { if (ArgumentChecker.checkArgs(args, "-dbo")) { impersonate.abuseImpersonationDBO(con, dboname); } else { impersonate.abuseImpersonationDBO(con); } }
 
 

